@@ -38,6 +38,11 @@ async function main() {
 
   await overlay.configure()
 
+  // Started early and independent of the DayZ boot sequence below, so the webui
+  // (including its own "something's wrong, here's just the config" fallback view)
+  // stays reachable even if Steam login, an update, or the server itself fails.
+  await server.startWebUI()
+
   const steamNeeded = !config.meta.skipUpdate || !config.meta.skipMods
   if (steamNeeded) await server.doSteamLogin()
 

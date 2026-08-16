@@ -36,6 +36,10 @@ The environment variables are split into three sections: **Meta**, **Server**, a
 | `SKIP_MOD_UPDATE` | `false` | Skips the mod update process |
 | `SKIP_MAP_UPDATE` | `false` | Skips the map update process |
 | `START_DAYZ_SERVER` | `true` | Starts DayZServer. Set to false if, for example, you only want to update the server and mods. |
+| `START_WEBUI` | `false` | Starts the webui alongside DayZServer, as a sibling child process ServerZ also owns the lifecycle of. |
+| `WEBUI_EXECUTABLE` | `/webui/dist/index.js` | The command used to start the webui (passed to Bun.spawn as argv[0]). Only used when START_WEBUI is enabled. |
+| `WEBUI_ARGS` | `[]` | Additional arguments to pass to the webui's start command. Only used when START_WEBUI is enabled. |
+| `WEBUI_DIRECTORY` | `/webui` | The working directory the webui is started in (where it reads/writes its own server-manager.json). Only used when START_WEBUI is enabled. |
 | `MAP_URL` | `undefined` | The URL to download the map from. If set, ServerZ will download the map from the URL and symlink it into `MAPS_PATH`. |
 | `COPY_MISSION` | `undefined` | **Deprecated.** When set to true, will copy the mission directory into `mpmissions`. This option is deprecated and will be removed in a future version. OverlayFS ensures all mission edits persist automatically. COPY_MISSION was a workaround for persistence that should no longer be needed. If OverlayFS doesn't replace this option for you, please let us know by creating an issue. See [readme.md#issues](../readme.md#issues) |
 | `COPY_MISSION_UP` | `undefined` | When `COPY_MISSION` is enabled, copy the mission into `OVERRIDES_DIRECTORY/mpmissions` instead of `INSTALL_DIRECTORY/mpmissions`. Useful when mission files should live with operator-managed overrides. |

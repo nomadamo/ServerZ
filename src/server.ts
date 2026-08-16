@@ -19,6 +19,7 @@ export class Server {
   private lastSteamProgressLineAt = 0
   private contentLockHeartbeat: ReturnType<typeof setInterval> | undefined
   private contentLocksReleased = true
+  private webUiProcess: ReturnType<typeof Bun.spawn> | undefined
 
   constructor(private steam: SteamAPI) {}
   /**
@@ -309,6 +310,51 @@ export class Server {
           break
       }
     }
+  }
+
+  /**
+   * Starts the webui as a sibling child process, if enabled. ServerZ keeps its own
+   * PID 1 status and owns the webui's lifecycle the same way it owns DayZServer's -
+   * SIGTERM/SIGINT get forwarded to it, and there's no separate re-spawn/IPC layer:
+   * the webui's own "restart" action just signals *this* process (its parent) to shut
+   * down, which falls into the exact same shutdown -> exitWithChild -> container
+   * restart path a crash would.
+   */
+  public async startWebUI() {
+    if (!config.meta.startWebUi) return undefined
+
+    const sharedConfigPath = path.join(config.meta.generatedConfigDirectory, "webui", "shared-config.json")
+    const command = [config.meta.webUiExecutable, ...config.meta.webUiArgs]
+    logger.info(`Starting Web UI with command: ${command.join(" ")}`)
+
+    const webui = Bun.spawn(command, {
+      cwd: config.meta.webUiDirectory,
+      stdio: ["inherit", "inherit", "inherit"],
+      env: {
+        ...process.env,
+        SERVERZ_SHARED_CONFIG_PATH: sharedConfigPath,
+      },
+    })
+
+    logger.info(`Web UI started (${webui.pid})`)
+    this.webUiProcess = webui
+
+    void webui.exited.then((code) => {
+      logger.info(`WebUI(${webui.pid}) exited with code ${code}`)
+      if (this.webUiProcess === webui) this.webUiProcess = undefined
+    })
+
+    const forwardToWebUI = (signal: "SIGTERM" | "SIGINT") => {
+      try {
+        webui.kill(signal)
+      } catch {
+        // already gone
+      }
+    }
+    process.once("SIGTERM", () => forwardToWebUI("SIGTERM"))
+    process.once("SIGINT", () => forwardToWebUI("SIGINT"))
+
+    return webui
   }
 
   /**

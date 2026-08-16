@@ -206,6 +206,27 @@ export const ServerZSchema = Type.Object(
         default: true,
         description: "Starts DayZServer. Set to false if, for example, you only want to update the server and mods.",
       }),
+      startWebUi: Type.Boolean({
+        env: "START_WEBUI",
+        default: false,
+        description: "Starts the webui alongside DayZServer, as a sibling child process ServerZ also owns the lifecycle of.",
+      }),
+      webUiExecutable: Type.String({
+        env: "WEBUI_EXECUTABLE",
+        default: "/webui/dist/index.js",
+        description: "The command used to start the webui (passed to Bun.spawn as argv[0]). Only used when START_WEBUI is enabled.",
+      }),
+      webUiArgs: Type.Array(Type.String(), {
+        env: "WEBUI_ARGS",
+        envFormat: "json",
+        default: [],
+        description: "Additional arguments to pass to the webui's start command. Only used when START_WEBUI is enabled.",
+      }),
+      webUiDirectory: Type.String({
+        env: "WEBUI_DIRECTORY",
+        default: "/webui",
+        description: "The working directory the webui is started in (where it reads/writes its own server-manager.json). Only used when START_WEBUI is enabled.",
+      }),
       mapURL: Type.Optional(
         Type.String({
           pattern: "^(?:@|https?://)",

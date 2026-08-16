@@ -124,7 +124,17 @@
             "banned": {
                 "__name": "BANLIST",
                 "__format": "json"
-            }
+            },
+            "startWebUi": {
+                "__name": "START_WEBUI",
+                "__format": "boolean"
+            },
+            "webUiExecutable": "WEBUI_EXECUTABLE",
+            "webUiArgs": {
+                "__name": "WEBUI_ARGS",
+                "__format": "json"
+            },
+            "webUiDirectory": "WEBUI_DIRECTORY"
         },
         "server": {
             "serverName": "SERVER_NAME",

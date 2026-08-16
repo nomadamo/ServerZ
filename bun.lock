@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "ServerZ",
@@ -58,14 +57,6 @@
         "@mongodb-js/zstd": "^7.0.0",
         "@zig-wasm/compress": "^0.1.0",
       },
-      "peerDependencies": {
-        "@mongodb-js/zstd": "*",
-        "@zig-wasm/compress": "*",
-      },
-      "optionalPeers": [
-        "@mongodb-js/zstd",
-        "@zig-wasm/compress",
-      ],
     },
   },
   "packages": {

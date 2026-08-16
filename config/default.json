@@ -35,7 +35,11 @@
             "wipeInstall": false,
             "wipeTimeout": 30,
             "whitelist": [],
-            "banned": []
+            "banned": [],
+            "startWebUi": false,
+            "webUiExecutable": "/webui/dist/index.js",
+            "webUiArgs": [],
+            "webUiDirectory": "/webui"
         },
         "server": {
             "serverName": "Example Server",

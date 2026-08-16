@@ -156,6 +156,29 @@ export interface ServerZGeneratedConfig {
          */
         startDayZServer: boolean
         /**
+         * Starts the webui alongside DayZServer, as a sibling child process ServerZ also owns the lifecycle of.
+         * @env START_WEBUI
+         */
+        startWebUi: boolean
+        /**
+         * The command used to start the webui (passed to Bun.spawn as argv[0]). Only used when START_WEBUI is enabled.
+         * @default "/webui/dist/index.js"
+         * @env WEBUI_EXECUTABLE
+         */
+        webUiExecutable: string
+        /**
+         * Additional arguments to pass to the webui's start command. Only used when START_WEBUI is enabled.
+         * @default []
+         * @env WEBUI_ARGS
+         */
+        webUiArgs: string[]
+        /**
+         * The working directory the webui is started in (where it reads/writes its own server-manager.json). Only used when START_WEBUI is enabled.
+         * @default "/webui"
+         * @env WEBUI_DIRECTORY
+         */
+        webUiDirectory: string
+        /**
          * The URL to download the map from. If set, ServerZ will download the map from the URL and symlink it into `MAPS_PATH`.
          * @env MAP_URL
          */
