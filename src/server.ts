@@ -251,25 +251,69 @@ export class Server {
     if (!config.meta.modList.length) {
       this.modNameMap = {}
       this.modNameList = []
-      logger.info("No mods configured")
-      return
+      logger.info("No workshop mods configured")
+    } else {
+      logger.info("Loading installed mods")
+
+      const modNames = await Promise.all(config.meta.modList.map(getModName))
+
+      this.modNameMap = Object.fromEntries(modNames)
+      this.modNameList = modNames.map(([, name]) => name)
+
+      logger.info("Creating mod folders in server directory")
+      await Promise.all(modNames.map(([id, name]) => createModSymlink(id, name)))
+
+      await overlay.reloading?.promise
+      await overlay.reload()
+
+      logger.info("Adding mod keys to server 'keys' directory")
+      await Promise.all(modNames.map(([, name]) => createModKeyLinks(name)))
+
+      await overlay.reloading?.promise
+      await overlay.reload()
     }
 
-    logger.info("Loading installed mods")
+    if (config.meta.localMods.length) await this.loadLocalMods()
+  }
 
-    const modNames = await Promise.all(config.meta.modList.map(getModName))
+  /**
+   * Copies mods that are already present on disk (not downloaded from Workshop) into
+   * the server directory and adds them to modNameList - e.g. the webui's own
+   * companion mod, built into this image at LOCAL_MODS_PATH rather than fetched at
+   * runtime. Done here (synchronously, before DayZServer is spawned) rather than
+   * relying on the webui's own async startup to place these files in time - that
+   * would be a real race against server.start() being called right after it.
+   */
+  private async loadLocalMods() {
+    logger.info(`Installing ${config.meta.localMods.length} local mod(s) from ${config.meta.localModsPath}`)
 
-    this.modNameMap = Object.fromEntries(modNames)
-    this.modNameList = modNames.map(([, name]) => name)
+    for (const name of config.meta.localMods) {
+      const source = `${config.meta.localModsPath}/@${name}`
+      const dest = `${config.meta.installDirectory}/@${name}`
 
-    logger.info("Creating mod folders in server directory")
-    await Promise.all(modNames.map(([id, name]) => createModSymlink(id, name)))
+      try {
+        await overlay.fs.access(source)
+      } catch {
+        logger.warn(`Local mod "@${name}" not found at ${source}; skipping`)
+        continue
+      }
 
-    await overlay.reloading?.promise
-    await overlay.reload()
+      // Copy fresh each start, in case the image's bundled copy changed.
+      await overlay.fs.rm(dest, { recursive: true, force: true }).catch(() => {})
+      await overlay.fs.cp(source, dest, { recursive: true })
+      this.modNameList.push(name)
 
-    logger.info("Adding mod keys to server 'keys' directory")
-    await Promise.all(modNames.map(([, name]) => createModKeyLinks(name)))
+      const keysDir = `${dest}/keys`
+      try {
+        const keys = await overlay.fs.readdir(keysDir)
+        await overlay.fs.mkdir(`${config.meta.installDirectory}/keys`, { recursive: true })
+        await Promise.all(
+          keys.map((key) => overlay.fs.copyFile(`${keysDir}/${key}`, `${config.meta.installDirectory}/keys/${key}`))
+        )
+      } catch {
+        // no keys dir - not all mods have one
+      }
+    }
 
     await overlay.reloading?.promise
     await overlay.reload()

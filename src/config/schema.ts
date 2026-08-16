@@ -179,6 +179,18 @@ export const ServerZSchema = Type.Object(
         description:
           "On start, the server will uninstall and delete all mods not found in `MOD_LIST`. (Uninstallation is limited to reversing any actions performed by the server to install the mods, any other configuration (whether applied manually or by the mod itself) will remain)",
       }),
+      localMods: Type.Array(Type.String(), {
+        env: "LOCAL_MODS",
+        envFormat: "json",
+        default: [],
+        description:
+          "Mod folder names (without the leading @) that are already present at LOCAL_MODS_PATH/@<name> rather than downloaded from Workshop - e.g. the webui's own companion mod. Copied into the server directory and included in the -mod= launch argument alongside MOD_LIST.",
+      }),
+      localModsPath: Type.String({
+        env: "LOCAL_MODS_PATH",
+        default: "/webui/dist/mods",
+        description: "Directory containing @<name> folders for LOCAL_MODS.",
+      }),
       extraStartupArgs: Type.Optional(
         Type.String({
           env: "EXTRA_STARTUP_ARGS",

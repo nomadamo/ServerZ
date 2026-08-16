@@ -134,7 +134,12 @@
                 "__name": "WEBUI_ARGS",
                 "__format": "json"
             },
-            "webUiDirectory": "WEBUI_DIRECTORY"
+            "webUiDirectory": "WEBUI_DIRECTORY",
+            "localMods": {
+                "__name": "LOCAL_MODS",
+                "__format": "json"
+            },
+            "localModsPath": "LOCAL_MODS_PATH"
         },
         "server": {
             "serverName": "SERVER_NAME",

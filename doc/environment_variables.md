@@ -31,6 +31,8 @@ The environment variables are split into three sections: **Meta**, **Server**, a
 | `MOD_APP_ID` | `221100` | The Steam App ID the workshop items (AKA: the mods) are associated with |
 | `MOD_PATH` | `${INSTALL_DIRECTORY}/steamapps/workshop/content/${MOD_APP_ID}` | The container path to where the downloaded workshop items can be found |
 | `CLEAN_MODS` | `false` | On start, the server will uninstall and delete all mods not found in `MOD_LIST`. (Uninstallation is limited to reversing any actions performed by the server to install the mods, any other configuration (whether applied manually or by the mod itself) will remain) |
+| `LOCAL_MODS` | `[]` | Mod folder names (without the leading @) that are already present at LOCAL_MODS_PATH/@<name> rather than downloaded from Workshop - e.g. the webui's own companion mod. Copied into the server directory and included in the -mod= launch argument alongside MOD_LIST. |
+| `LOCAL_MODS_PATH` | `/webui/dist/mods` | Directory containing @<name> folders for LOCAL_MODS. |
 | `EXTRA_STARTUP_ARGS` | `undefined` | Any additional arguments to pass to the server start command |
 | `SKIP_UPDATE` | `false` | Skips the server update process |
 | `SKIP_MOD_UPDATE` | `false` | Skips the mod update process |

@@ -130,6 +130,18 @@ export interface ServerZGeneratedConfig {
          */
         cleanMods: boolean
         /**
+         * Mod folder names (without the leading @) that are already present at LOCAL_MODS_PATH/@<name> rather than downloaded from Workshop - e.g. the webui's own companion mod. Copied into the server directory and included in the -mod= launch argument alongside MOD_LIST.
+         * @default []
+         * @env LOCAL_MODS
+         */
+        localMods: string[]
+        /**
+         * Directory containing @<name> folders for LOCAL_MODS.
+         * @default "/webui/dist/mods"
+         * @env LOCAL_MODS_PATH
+         */
+        localModsPath: string
+        /**
          * Any additional arguments to pass to the server start command
          * @env EXTRA_STARTUP_ARGS
          */

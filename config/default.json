@@ -41,7 +41,9 @@
             "webUiArgs": [
                 "/webui/dist/index.js"
             ],
-            "webUiDirectory": "/webui"
+            "webUiDirectory": "/webui",
+            "localMods": [],
+            "localModsPath": "/webui/dist/mods"
         },
         "server": {
             "serverName": "Example Server",
