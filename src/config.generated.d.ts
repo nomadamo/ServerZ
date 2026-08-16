@@ -168,7 +168,7 @@ export interface ServerZGeneratedConfig {
         webUiExecutable: string
         /**
          * Arguments to pass to WEBUI_EXECUTABLE. Only used when START_WEBUI is enabled.
-         * @default ["dist/index.js"]
+         * @default ["/webui/dist/index.js"]
          * @env WEBUI_ARGS
          */
         webUiArgs: string[]

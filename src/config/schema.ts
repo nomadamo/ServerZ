@@ -219,7 +219,10 @@ export const ServerZSchema = Type.Object(
       webUiArgs: Type.Array(Type.String(), {
         env: "WEBUI_ARGS",
         envFormat: "json",
-        default: ["dist/index.js"],
+        // Absolute, deliberately - WEBUI_DIRECTORY is where the webui's own data lives
+        // (server-manager.json, metrics, logs) and is used as its cwd, which is not
+        // necessarily where its code lives (e.g. baked into the image at /webui).
+        default: ["/webui/dist/index.js"],
         description: "Arguments to pass to WEBUI_EXECUTABLE. Only used when START_WEBUI is enabled.",
       }),
       webUiDirectory: Type.String({

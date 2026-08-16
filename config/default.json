@@ -39,7 +39,7 @@
             "startWebUi": false,
             "webUiExecutable": "node",
             "webUiArgs": [
-                "dist/index.js"
+                "/webui/dist/index.js"
             ],
             "webUiDirectory": "/webui"
         },
