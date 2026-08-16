@@ -15,7 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY dayz-server-manager/package*.json ./
 COPY dayz-server-manager/ui/package*.json ./ui/
-RUN npm ci && npm run install:ui
+# npm ci (both the root install and its own install:ui postinstall hook) fails here -
+# this fork's ui/package-lock.json has drifted out of sync with ui/package.json
+# (missing jquery/popper.js). npm install tolerates that; npm ci doesn't.
+RUN npm install --ignore-scripts && cd ui && npm install
 
 COPY dayz-server-manager/ ./
 
@@ -64,18 +67,18 @@ RUN mkdir -p /serverz /dayz /install /overrides /data /root/.steam
 WORKDIR /serverz
 
 # Copy lockfile and package.json first for better layer caching
-COPY package.json bun.lock* ./
-COPY src/lib/steamapi/depot-client/package.json ./src/lib/steamapi/depot-client/
+COPY serverz/package.json serverz/bun.lock* ./
+COPY serverz/src/lib/steamapi/depot-client/package.json ./src/lib/steamapi/depot-client/
 
 RUN bun install --frozen-lockfile --production
 
 # Copy source after deps so source changes don't bust the install layer
-COPY healthcheck.sh ./
-COPY jsx-runtime.ts ./
-COPY tsconfig.json ./
-COPY templates/ templates/
-COPY config/ config/
-COPY src/ src/
+COPY serverz/healthcheck.sh ./
+COPY serverz/jsx-runtime.ts ./
+COPY serverz/tsconfig.json ./
+COPY serverz/templates/ templates/
+COPY serverz/config/ config/
+COPY serverz/src/ src/
 
 RUN chmod +x healthcheck.sh
 
