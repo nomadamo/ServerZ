@@ -37,8 +37,10 @@
             "whitelist": [],
             "banned": [],
             "startWebUi": false,
-            "webUiExecutable": "/webui/dist/index.js",
-            "webUiArgs": [],
+            "webUiExecutable": "node",
+            "webUiArgs": [
+                "dist/index.js"
+            ],
             "webUiDirectory": "/webui"
         },
         "server": {

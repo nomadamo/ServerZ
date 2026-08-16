@@ -161,14 +161,14 @@ export interface ServerZGeneratedConfig {
          */
         startWebUi: boolean
         /**
-         * The command used to start the webui (passed to Bun.spawn as argv[0]). Only used when START_WEBUI is enabled.
-         * @default "/webui/dist/index.js"
+         * The command used to start the webui (passed to Bun.spawn as argv[0]). The webui's native modules are built against Node's ABI, so this runs under Node rather than Bun. Only used when START_WEBUI is enabled.
+         * @default "node"
          * @env WEBUI_EXECUTABLE
          */
         webUiExecutable: string
         /**
-         * Additional arguments to pass to the webui's start command. Only used when START_WEBUI is enabled.
-         * @default []
+         * Arguments to pass to WEBUI_EXECUTABLE. Only used when START_WEBUI is enabled.
+         * @default ["dist/index.js"]
          * @env WEBUI_ARGS
          */
         webUiArgs: string[]

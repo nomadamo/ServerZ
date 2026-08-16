@@ -213,14 +213,14 @@ export const ServerZSchema = Type.Object(
       }),
       webUiExecutable: Type.String({
         env: "WEBUI_EXECUTABLE",
-        default: "/webui/dist/index.js",
-        description: "The command used to start the webui (passed to Bun.spawn as argv[0]). Only used when START_WEBUI is enabled.",
+        default: "node",
+        description: "The command used to start the webui (passed to Bun.spawn as argv[0]). The webui's native modules are built against Node's ABI, so this runs under Node rather than Bun. Only used when START_WEBUI is enabled.",
       }),
       webUiArgs: Type.Array(Type.String(), {
         env: "WEBUI_ARGS",
         envFormat: "json",
-        default: [],
-        description: "Additional arguments to pass to the webui's start command. Only used when START_WEBUI is enabled.",
+        default: ["dist/index.js"],
+        description: "Arguments to pass to WEBUI_EXECUTABLE. Only used when START_WEBUI is enabled.",
       }),
       webUiDirectory: Type.String({
         env: "WEBUI_DIRECTORY",
