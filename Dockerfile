@@ -7,13 +7,33 @@ FROM node:20-bullseye AS webui-build
 
 WORKDIR /webui-src
 
-# System deps for compiling native modules, in case no prebuilt binary matches
-# this platform/ABI and npm falls back to building from source.
+# System deps for compiling native modules (in case no prebuilt binary matches this
+# platform/ABI and npm falls back to building from source), plus mikero-tools'
+# (makepbo) runtime library dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     python3 \
     build-essential \
+    curl \
+    liblzo2-2 \
+    libvorbis0a \
+    libvorbisfile3 \
+    libvorbisenc2 \
+    libogg0 \
+    libuchardet0 \
     && rm -rf /var/lib/apt/lists/*
+
+# mikero-tools (makepbo) - compiles watcher_mod/* into the .pbo files the
+# player/vehicle-map feature's companion mod needs. The exact filename below can go
+# stale (it already had once - this repo doesn't do GitHub releases, just publishes
+# whatever's current under the "latest" branch/path), so if this 404s, check
+# https://github.com/arma-actions/mikero-tools/tree/latest/linux for the current name.
+RUN curl -fsSL "https://raw.githubusercontent.com/arma-actions/mikero-tools/latest/linux/depbo-tools-0.9.62-linux-amd64.tar" -o /tmp/depbo.tar \
+    && mkdir -p /opt/mikero-tools \
+    && tar -xf /tmp/depbo.tar --strip-components=1 -C /opt/mikero-tools \
+    && rm /tmp/depbo.tar
+ENV PATH="/opt/mikero-tools/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/mikero-tools/lib"
 
 COPY dayz-server-manager/package*.json ./
 COPY dayz-server-manager/ui/package*.json ./ui/
@@ -28,14 +48,11 @@ RUN npm install
 
 COPY dayz-server-manager/ ./
 
-# Deliberately skips build:pbos here (npm run build's full pipeline) - that step
-# needs a separate PBO-compiler toolchain (mikero-tools) just to build the bundled
-# companion mod used by the player/vehicle-map feature. Everything else (dashboard,
-# RCON, Discord bot, config editor, log viewer, restart control) doesn't need it.
-# dist/mods is created empty so IngameReport.installMod()'s readdir doesn't fail on
-# a missing directory; the map feature simply won't have a mod to install yet.
-RUN npm run generator && npm run build:tsc && npm run build:ui
-RUN mkdir -p dist/mods
+# Full pipeline now, including build:pbos (mikero-tools is on PATH above) - this
+# fork's build-pbos.js already handles a missing makepbo gracefully (placeholder
+# dirs instead of failing), so this would have degraded safely even without the
+# toolchain; now it actually compiles watcher_mod/* into real .pbo files.
+RUN npm run build
 
 # Drop devDependencies for the runtime image - keeps native modules that were just
 # built/fetched for this exact platform, without carrying the whole toolchain forward.
