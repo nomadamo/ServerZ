@@ -1,7 +1,9 @@
 ### Stage: build the webui (dayz-server-manager) ###
-# Node 16 matches this fork's own CI (.github/workflows/build.yml) - kept in sync
-# to minimize native-module ABI surprises (better-sqlite3, node-pty).
-FROM node:16-bullseye AS webui-build
+# This fork's own CI (.github/workflows/build.yml) targets Node 16, but that's EOL and
+# the runtime stage's `apt install nodejs` pulls whatever Debian currently ships (20.x
+# at time of writing) - native modules (better-sqlite3, node-pty) are ABI-specific, so
+# this must match the runtime's actual Node version, not the older CI target.
+FROM node:20-bullseye AS webui-build
 
 WORKDIR /webui-src
 
@@ -15,10 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY dayz-server-manager/package*.json ./
 COPY dayz-server-manager/ui/package*.json ./ui/
-# npm ci (both the root install and its own install:ui postinstall hook) fails here -
-# this fork's ui/package-lock.json has drifted out of sync with ui/package.json
-# (missing jquery/popper.js). npm install tolerates that; npm ci doesn't.
-RUN npm install --ignore-scripts && cd ui && npm install
+# ui/package-lock.json has drifted from ui/package.json in this fork (missing
+# jquery/popper.js) - npm ci enforces an exact match and fails, npm install doesn't.
+# Patching the postinstall hook (which runs "cd ui && npm ci") to use npm install
+# instead, rather than passing --ignore-scripts globally - that would also skip
+# native modules' (node-pty, better-sqlite3) own postinstall build/prebuild-fetch
+# scripts, which are required, not just this one broken one.
+RUN sed -i 's#cd ui && npm ci#cd ui \&\& npm install#' package.json
+RUN npm install
 
 COPY dayz-server-manager/ ./
 

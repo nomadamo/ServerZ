@@ -38,11 +38,6 @@ async function main() {
 
   await overlay.configure()
 
-  // Started early and independent of the DayZ boot sequence below, so the webui
-  // (including its own "something's wrong, here's just the config" fallback view)
-  // stays reachable even if Steam login, an update, or the server itself fails.
-  await server.startWebUI()
-
   const steamNeeded = !config.meta.skipUpdate || !config.meta.skipMods
   if (steamNeeded) await server.doSteamLogin()
 
@@ -52,6 +47,18 @@ async function main() {
   if (config.meta.cleanMods) await server.cleanMods()
   if (!config.meta.skipMap) await server.updateMap()
   await server.applyTemplates()
+
+  // Started after applyTemplates() generates shared-config.json, deliberately - the
+  // webui's config-watcher is supposed to pick up that file's later appearance via a
+  // live reload, but that doesn't reliably fire in this environment (untraced, maybe
+  // an overlay.fs/inotify interaction) - starting after it already exists sidesteps
+  // needing that to work at all, so the RCON password/paths are correct from the
+  // webui's very first config read, not "eventually, if the watcher cooperates".
+  // Trade-off: the webui is no longer reachable during Steam login/update/mod install,
+  // only from here through the actual server starting - still independent of
+  // START_DAYZ_SERVER/whether the server itself boots successfully, though.
+  await server.startWebUI()
+
   if (config.meta.startDayZServer) {
     removeDirectSignalShutdownHandlers()
     await server.start()
