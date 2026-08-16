@@ -26,7 +26,12 @@ export async function generate(config: ServerZGeneratedConfig) {
 
     // -- Paths --
     serverPath: meta.serverDirectory,
-    serverExe: meta.dayZBinaryPath,
+    // basename, not meta.dayZBinaryPath's full path - the webui's own
+    // getServerExePath() does path.join(serverPath, serverExe) itself, so a full
+    // path here doubles up into a garbled, never-matching path (confirmed live:
+    // this is why the dashboard reported STOPPED despite the server running -
+    // process detection was searching for a path that could never exist).
+    serverExe: path.basename(meta.dayZBinaryPath),
     serverPort: meta.port,
     profilesPath: abs(meta.profilesPath),
     battleyePath: abs(meta.bePath),
